@@ -9,10 +9,11 @@ def main():
     # print(x.strftime("%d/%m/%Y"))
 
     c = CalendarCalculator("06/01/2021","28/2/2021", "-")
-    # print(c.semesterStartDate.strftime("%d/%m/%Y"))
-    wlist = c.calculateWeekList()
-
-    print(wlist)
+    f = FolderCreator(os.getcwd(), ["Hello", "Hello2"], c.calculateWeekList())
+    
+    print("Creating Directories...")
+    f.createDirectoryStructure()
+    print("Directories Created!")
 
 
 class CalendarCalculator:
@@ -41,16 +42,25 @@ class CalendarCalculator:
 
 class FolderCreator:
     def __init__(self, targetDir, courseList, weekList):
-        pass
+        self.targetDir = targetDir
+        self.courseList = courseList
+        self.weekList = weekList
 
     def createDirectoryStructure(self):
-        pass
+        for name in self.courseList:
+            courseDir = self.targetDir + "\\" + name
+            extraDir = courseDir + "\\" + "Extra"
 
-    def createFolder(self):
-        pass
-
-    def createTextFile(self):
-        pass
+            os.mkdir(courseDir)
+            weekCount = 1
+            for week in self.weekList:
+                folderName = "Week " + str(weekCount) + " (" + week + ")"
+                os.mkdir(courseDir + "\\" + folderName)
+                weekCount += 1
+            
+            os.mkdir(extraDir)
+            open(extraDir + "\\Notes.txt", "w")
+            open(extraDir + "\\Zoom.txt", "w")
 
 
 if __name__ == "__main__":
