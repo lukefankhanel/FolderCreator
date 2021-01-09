@@ -5,7 +5,7 @@ import datetime
 # Main function to get user input and instantiate objects.
 def main():
     dateDelimiter = "-"
-    courseString = input("What is the list of courses? (Separated by a \",\"):")
+    courseString = input("What is the list of courses? (Separated by a \",\" NO SPACES AFTER COMMAS!):")
     startString = input("What is the semester start date? (Of the format: dd/mm/yyyy):")
     endString = input("What is the semester end date? (Of the format: dd/mm/yyyy):")
     breakWeeks = input("Are there any break weeks in the semester? "
