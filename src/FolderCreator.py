@@ -2,25 +2,36 @@ import os
 import datetime
 
 def main():
-    #print(os.getcwd())
-    # x = datetime.date(2021, 1, 9)
-    # mondayDiff = x.weekday()
-    # x = x + datetime.timedelta(days=-mondayDiff)
-    # print(x.strftime("%d/%m/%Y"))
+    dateDelimiter = "-"
+    courseString = input("What is the list of courses? (Separated by a \",\"):")
+    startString = input("What is the semester start date? (Of the format: dd/mm/yyyy):")
+    endString = input("What is the semester end date? (Of the format: dd/mm/yyyy):")
+    breakWeeks = input("Are there any break weeks in the semester? "
+    + "(Of the format: dd/mm/year, dd/mm/yyyy, etc. - Press enter if none):")
 
-    c = CalendarCalculator("06/01/2021","28/2/2021", "-")
-    f = FolderCreator(os.getcwd(), ["Hello", "Hello2"], c.calculateWeekList())
+    courseList = courseString.split(",")
+    breakList = breakWeeks.split(",")
+    
+    c = CalendarCalculator(startString, endString, breakList, dateDelimiter)
+    f = FolderCreator(os.getcwd(), courseList, c.calculateWeekList())
     
     print("Creating Directories...")
     f.createDirectoryStructure()
     print("Directories Created!")
 
 
+
 class CalendarCalculator:
-    def __init__(self, semesterStartDate, semesterEndDate, dateDelimiter):
+    def __init__(self, semesterStartDate, semesterEndDate, breakWeeks, dateDelimiter):
         self.semesterStartDate = self.findMostRecentMonday(self.convertToDateObject(semesterStartDate))
         self.semesterEndDate = self.findMostRecentMonday(self.convertToDateObject(semesterEndDate))
         self.dateDelimiter = dateDelimiter
+
+        if breakWeeks[0] == "":
+            self.breakWeeks = []
+        else:    
+            self.breakWeeks = self.convertDateWeeks(breakWeeks)
+        
 
     def convertToDateObject(self, stringValue):
         splitString = stringValue.split("/")
@@ -30,13 +41,20 @@ class CalendarCalculator:
         mondayDifference = date.weekday()
         return date + datetime.timedelta(days=-mondayDifference)
 
+    def convertDateWeeks(self, stringList):
+        breakList = []
+        for week in stringList:
+            breakList.append(self.findMostRecentMonday(self.convertToDateObject(week)))
+        return breakList
+
     def calculateWeekList(self):
         currentSemesterDate = self.semesterStartDate
         oneWeek = datetime.timedelta(days=7)
         weekList = []
 
         while(currentSemesterDate <= self.semesterEndDate):
-            weekList.append(currentSemesterDate.strftime("%d" + self.dateDelimiter + "%m" + self.dateDelimiter + "%Y"))
+            if currentSemesterDate not in self.breakWeeks:
+                weekList.append(currentSemesterDate.strftime("%d" + self.dateDelimiter + "%b" + self.dateDelimiter + "%Y"))
             currentSemesterDate += oneWeek
         return weekList
 
@@ -51,16 +69,20 @@ class FolderCreator:
             courseDir = self.targetDir + "\\" + name
             extraDir = courseDir + "\\" + "Extra"
 
-            os.mkdir(courseDir)
-            weekCount = 1
-            for week in self.weekList:
-                folderName = "Week " + str(weekCount) + " (" + week + ")"
-                os.mkdir(courseDir + "\\" + folderName)
-                weekCount += 1
+            try:
+                os.mkdir(courseDir)
+                weekCount = 1
+                for week in self.weekList:
+                    folderName = "Week " + str(weekCount) + " (" + week + ")"
+                    os.mkdir(courseDir + "\\" + folderName)
+                    weekCount += 1
+                
+                os.mkdir(extraDir)
+                open(extraDir + "\\Notes.txt", "w")
+                open(extraDir + "\\Zoom.txt", "w")
+            except Exception as e:
+                print("Error: " + e)
             
-            os.mkdir(extraDir)
-            open(extraDir + "\\Notes.txt", "w")
-            open(extraDir + "\\Zoom.txt", "w")
 
 
 if __name__ == "__main__":
